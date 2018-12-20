@@ -32,6 +32,8 @@ type Startup private () =
     // This method gets called by the runtime. Use this method to add services to the container.
     member this.ConfigureServices(services : IServiceCollection) =
         
+        services.AddLogging() |> ignore
+        
         services.AddSwaggerGen(fun x ->
             x.SwaggerDoc("v1", new Info(Title = "SimpleCms", Version = "v1")) |> ignore)
             |> ignore
@@ -44,9 +46,9 @@ type Startup private () =
             new Container(fun opt -> 
             
             opt.Scan(fun x -> 
+                x.AssemblyContainingType(typeof<Startup>)
                 x.Assembly("Dal")
                 x.Assembly("Logic")
-                x.AssemblyContainingType(typeof<Startup>)
                 x.WithDefaultConventions() |> ignore)
             
             opt.For<LiteDatabase>().Use(new LiteDatabase("Filename=database.db")) |> ignore
@@ -56,12 +58,7 @@ type Startup private () =
         container.GetInstance<IServiceProvider>()
     
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    member this.Configure(app : IApplicationBuilder, env : IHostingEnvironment, loggerBuilder: ILoggingBuilder) =
-        loggerBuilder
-            .AddConsole()
-            .AddDebug()
-            |> ignore
-            
+    member this.Configure(app : IApplicationBuilder, env : IHostingEnvironment) =
         app.UseSwagger() |> ignore
         
         app.UseSwaggerUI(fun x ->
