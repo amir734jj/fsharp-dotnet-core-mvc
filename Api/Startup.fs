@@ -65,5 +65,4 @@ type Startup private () =
         app.UseSwaggerUI(fun x ->
             x.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1") |> ignore) |> ignore
 
-        app.UseMvc(fun x ->
-            x.MapRoute("default", "{controller=Home}/{action=Index}") |> ignore) |> ignore
+        app.UseMvc() |> ignore
