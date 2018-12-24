@@ -5,39 +5,42 @@ open Microsoft.AspNetCore.Mvc
 open Models.Models
 open System.Collections.Generic
 
-type IPostController =
-    abstract GetAll : unit -> IEnumerable<Post>
-    abstract Save : Post -> bool
-    abstract Get : string -> Post
-    abstract Delete : string -> bool
-    abstract Update : string * Post -> bool
-
-[<Route("api/[controller]")>]
-type PostController(logic : IPostLogic) =
+[<AbstractClass>]
+type public AbstractCrudController<'T>() =
     inherit Controller()
+    abstract member GetAll : unit -> IEnumerable<'T> 
+    abstract member Save : 'T -> bool
+    abstract member Get : string -> 'T 
+    abstract member Delete : string -> bool
+    abstract member Update : string * 'T -> bool
+ 
+[<Route("api/[controller]")>]
+type public PostController(logic : IPostLogic) =
+    inherit AbstractCrudController<Post>()
     member this.logic = logic
 
     [<Route("")>]
     [<HttpGet>]
-    member this.GetAll() = 
+    override this.GetAll() = 
         this.logic.GetAll()
     
     [<Route("{id}")>]
     [<HttpGet>]
-    member this.Get([<FromRoute>] id) = 
+    override this.Get([<FromRoute>] id) = 
         this.logic.Get(id)
     
     [<Route("")>]
     [<HttpPost>]
-    member this.Save([<FromBody>] obj) = 
+    override this.Save([<FromBody>] obj) = 
         this.logic.Save(obj)
     
     [<Route("{id}")>]
     [<HttpDelete>]
-    member this.Delete([<FromRoute>] id) = 
+    override this.Delete([<FromRoute>] id) = 
         this.logic.Delete(id)
     
     [<Route("{id}")>]
     [<HttpPut>]
-    member this.Update([<FromRoute>] id, [<FromBody>] obj) = 
+    override this.Update([<FromRoute>] id, [<FromBody>] obj) = 
         this.logic.Update(id, obj)
+
